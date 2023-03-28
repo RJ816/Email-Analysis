@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-GLhlTQ8iRABdZLl6O3oVMWSktQOp6b7In1Zl3/Jr59b6EGGoI1aFkw7cmDA6j6gD" crossorigin="anonymous">
+<style>* {font-family: Arial, Helvetica, sans-serif;}</style>
+<title>Email Header Analysis</title>
+</head>
+
+<body class="container-fluid">
+    
+<div class="row display-4 justify-content-center fw-bolder mb-5">Email Header Analysis</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">Overview</div>
+<div class="row m-0 p-0 mb-5">Analysis of email headers and SMTP logs of emails sent through an open relay mail server.</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">Lab Environment</div>
+<div class="row m-0 p-0 mb-5">
+  <ul>
+    <li>MS1 (SMTP Server)</li>
+    <li>PC1 (Recepient Host)</li>
+    <li>LAMP (Receiving Mail Server)</li>
+    <li>PT1 (Sending Mail Server/Host)</li>
+  </ul>
+</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">Legitimate Email Analysis</div>
+<div class="row m-0 p-0">
+  On PT1, a test email was sent on the Thunderbird email client. 
+  On PC1, the received message was then inspected by viewing its email header.
+  <div class="row mb-5"><img src="images/1.png" alt="1" class="col-lg-6"><img src="images/2.png" alt="2" class="col-lg-6"></div>
+  <ul>
+    <li>Return Path: This was the original sender address, as expected. No relaying servers changed the address.</li>
+    <li>Received: In this network there were just two servers that processed the emails, mail.515support.com (receiving server) and mail.515web.net (sending server). </li>
+    <li>From: This is the original sender's address as expected.</li>
+  </ul>
+  <div class="row mb-5 justify-content-center"><img src="images/3.png" alt="3" class="col-lg-6"></div>
+</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">Phishing Email Analysis</div>
+<div class="row m-0 p-0">
+  PT1 has Postfix installed to allow it to act as an open mail relay SMTP server.
+  This type of server can be used by spammers to send phishing emails to potential victims.
+  The server was started with the following code:
+  <code>service postfix start</code>
+  In the settings for hostmaster@515web.net, the option to edit the SMTP server (mail.515web.net) can be found.
+  <div class="row mb-5 justify-content-center"><img src="images/4.png" alt="4" class="col-lg-6"></div>
+  Make sure the default SMTP port is entered and no security and authentication is set.
+  <div class="row mb-5"><img src="images/5.png" alt="5" class="col-lg-6"><img src="images/6.png" alt="6" class="col-lg-6"></div>
+  A phishing email was sent to sam@515support.com with malware attached. 
+  <div class="row mb-5 justify-content-center"><img src="images/7.png" alt="7" class="col-lg-6"></div>
+  <ul>
+    <li>Return-Path/From: The sender address domain is familiar looking so will likely be be trusted by the potential victim.</li>
+    <li>Received: The open relay server can be seen in the list.</li>
+  </ul>
+  Normally authorized relay servers would be managed by Sender Policy Framework (SPF), Domainkey Identified Mail (DKIM), 
+  and Domain-based Message Authentication Reporting and Conformance (DMARC).
+  If this server domain wasn't whitelisted it should be investigated as a possible threat.
+  <div class="row mb-5 justify-content-center"><img src="images/8.png" alt="8" class="col-lg-6"></div>
+</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">Impersonate an Associate</div>
+<div class="row m-0 p-0">
+  In the hostmaster account settings on PT1, an associate name familiar to the target victim was used in a email address.
+  <div class="row mb-5 justify-content-center"><img src="images/9.png" alt="9" class="col-lg-6"></div>
+  A phishing email with the malware attached was sent to PC1 to impersonate as the proposed associate.
+  <div class="row mb-5 justify-content-center"><img src="images/10.png" alt="10" class="col-lg-6"></div>
+  When checking PC1, the email was not received however.
+</div>
+
+<div class="row fw-bold p-0 m-0 mb-3">SMTP Log Analysis</div>
+<div class="row m-0 p-0">
+  On MS1, hMailServer Administrator was used to check the SMTP logs for what happened to the missing email.
+  <div class="row mb-5 justify-content-center"><img src="images/11.png" alt="11" class="col-lg-6"></div>
+  In the SMTP log where the most recent events are held, 
+  there should be a “530 SMTP authentication is required” warning since the local server refused the connection after server reset.
+  <div class="row mb-5 justify-content-center"><img src="images/12.png" alt="12" class="col-lg-6"></div>
+  Checking the PC1 email account, there should be a nondelivery report (NDR) reflecting the log found on MS1.
+  <div class="row mb-5 justify-content-center"><img src="images/13.png" alt="13" class="col-lg-6"></div>
+  Further action could be taken in a real world scenario, such as contacting the open relay server owner or blacklisting them and their IP addresses. 
+ </div>
+
+</body>
+</html>
